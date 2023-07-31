@@ -92,7 +92,61 @@ const Launcher = ({
   });
 
   if (isChatOpen) className.push('rw-hide-sm');
+  if (!openLauncherImage) className.push('rw-launcher-default');
   if (fullScreenMode && isChatOpen) className.push('rw-full-screen rw-hide');
+
+  // 拖动button的方法实现
+  const draggingRef = useRef(false);
+  const isDraggingRef = useRef(false);
+  const [startY, setStartY] = useState(0);
+  const [top, setTop] = useState(window.innerHeight - 100);
+
+  useEffect(() => {
+    const handleResize = () => {
+      // Update the top limit based on window height
+      const windowHeight = window.innerHeight;
+      setTop((prevTop) => Math.min(prevTop, windowHeight - 90));
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+
+  const handleMouseDown = (e) => {
+    e.preventDefault();
+    draggingRef.current = true;
+    setStartY(e.clientY);
+  };
+
+  const handleMouseMove = (e) => {
+    e.preventDefault();
+    if (draggingRef.current && e.buttons === 1) {
+      const deltaY = e.clientY - startY;
+      // Limit the top value within the range [90, windowHeight - 90]
+      const windowHeight = window.innerHeight;
+      setTop((prevTop) => Math.max(Math.min(prevTop + deltaY, windowHeight - 90), 90));
+      setStartY(e.clientY);
+      isDraggingRef.current = true;
+    } else {
+      draggingRef.current = false;
+      isDraggingRef.current = false; 
+    }
+  };
+
+  const handleMouseUp = (e) => {
+    e.preventDefault();
+    draggingRef.current = false;
+  };
+  const clickLauncher = () => {
+    if (!isDraggingRef.current) {
+      toggle();
+    }
+  }
+  // end
 
   const getComponentToRender = (message, buttonSeparator = false) => {
     const ComponentToRender = (() => {
@@ -206,7 +260,20 @@ const Launcher = ({
   );
 
   return (
-    <button type="button" style={{ backgroundColor: mainColor }} className={className.join(' ')} onClick={toggle}>
+    <button
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      style={{
+        backgroundColor: mainColor,
+        top: `${top}px`,
+        cursor: 'grabbing',
+        position: 'fixed',
+        right: `${openLauncherImage ? '-33px' : '5px'}`
+      }} 
+      type="button" 
+      className={className.join(' ')} 
+      onClick={clickLauncher}>
       <Badge badge={badge} />
       {isChatOpen ? (
         <img

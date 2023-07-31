@@ -58,7 +58,10 @@
   }
 
   .#{$namespace}close-button {
-    display: none;
+    @include header-button-fs;
+    .#{$namespace}close {
+      height: 15px;
+    }
   }
 
   .#{$namespace}toggle-fullscreen-button {

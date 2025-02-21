@@ -133,7 +133,7 @@ const Launcher = ({
       isDraggingRef.current = true;
     } else {
       draggingRef.current = false;
-      isDraggingRef.current = false; 
+      isDraggingRef.current = false;
     }
   };
 
@@ -141,6 +141,34 @@ const Launcher = ({
     e.preventDefault();
     draggingRef.current = false;
   };
+
+  // 添加触摸事件处理函数
+  const handleTouchStart = (e) => {
+    e.preventDefault();
+    draggingRef.current = true;
+    setStartY(e.touches[0].clientY);
+  };
+
+  const handleTouchMove = (e) => {
+    e.preventDefault();
+    if (draggingRef.current) {
+      const deltaY = e.touches[0].clientY - startY;
+      const windowHeight = window.innerHeight;
+      setTop((prevTop) => Math.max(Math.min(prevTop + deltaY, windowHeight - 90), 90));
+      setStartY(e.touches[0].clientY);
+      isDraggingRef.current = true;
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    e.preventDefault();
+    if (!isDraggingRef.current) {
+      clickLauncher();
+    }
+    draggingRef.current = false;
+    isDraggingRef.current = false;
+  };
+
   const clickLauncher = () => {
     if (!isDraggingRef.current) {
       toggle();
@@ -206,7 +234,7 @@ const Launcher = ({
             /* stop the propagation because the popup is also a button
             otherwise it would open the webchat when closing the tooltip */
             e.stopPropagation();
-            
+
             const payload = domHighlight.get('tooltipClose')
               if(domHighlight && payload){
                 sendPayload(`/${payload}`)
@@ -264,15 +292,18 @@ const Launcher = ({
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
       style={{
         backgroundColor: mainColor,
         top: `${top}px`,
         cursor: 'grabbing',
         position: 'fixed',
         right: `${openLauncherImage ? '-33px' : '5px'}`
-      }} 
-      type="button" 
-      className={className.join(' ')} 
+      }}
+      type="button"
+      className={className.join(' ')}
       onClick={clickLauncher}>
       <Badge badge={badge} />
       {isChatOpen ? (

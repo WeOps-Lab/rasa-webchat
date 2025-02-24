@@ -162,7 +162,11 @@ const Launcher = ({
 
   const handleTouchEnd = (e) => {
     if (e.cancelable) e.preventDefault();
+    if (!isDraggingRef.current) {
+      clickLauncher();
+    }
     draggingRef.current = false;
+    isDraggingRef.current = false;
   };
 
   const clickLauncher = () => {

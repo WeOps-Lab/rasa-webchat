@@ -144,13 +144,13 @@ const Launcher = ({
 
   // 添加触摸事件处理函数
   const handleTouchStart = (e) => {
-    e.preventDefault();
+    if (e.cancelable) e.preventDefault();
     draggingRef.current = true;
     setStartY(e.touches[0].clientY);
   };
 
   const handleTouchMove = (e) => {
-    e.preventDefault();
+    if (e.cancelable) e.preventDefault();
     if (draggingRef.current) {
       const deltaY = e.touches[0].clientY - startY;
       const windowHeight = window.innerHeight;
@@ -161,12 +161,8 @@ const Launcher = ({
   };
 
   const handleTouchEnd = (e) => {
-    e.preventDefault();
-    if (!isDraggingRef.current) {
-      clickLauncher();
-    }
+    if (e.cancelable) e.preventDefault();
     draggingRef.current = false;
-    isDraggingRef.current = false;
   };
 
   const clickLauncher = () => {
@@ -300,7 +296,8 @@ const Launcher = ({
         top: `${top}px`,
         cursor: 'grabbing',
         position: 'fixed',
-        right: `${openLauncherImage ? '-33px' : '5px'}`
+        right: `${openLauncherImage ? '-33px' : '5px'}`,
+        touchAction: 'none' // 禁用触摸默认滚动
       }}
       type="button"
       className={className.join(' ')}
